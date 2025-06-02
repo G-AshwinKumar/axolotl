@@ -45,16 +45,39 @@ def parse_requirements(extras_require_map):
             print(
                 _install_requires, [req in skip_packages for req in _install_requires]
             )
-        else:
+        else: # not Darwin
             # detect the version of torch already installed
             # and set it so dependencies don't clobber the torch version
             try:
                 torch_version = version("torch")
+                print(f"INFO: Detected torch version: {torch_version} for axolotl setup logic.")
             except PackageNotFoundError:
-                torch_version = "2.6.0"  # default to torch 2.6
-            _install_requires.append(f"torch=={torch_version}")
+                # If torch is not found by version(), we still need a torch_version
+                # for the subsequent xformers/vllm logic.
+                # However, we will NOT add torch to _install_requires.
+                # The environment (and its constraints.txt) MUST provide torch.
+                # For the logic below, we'll use the version from your constraint file if possible,
+                # or fall back to a sensible default if we can't infer it.
+                # Since your constraint is 2.7.0a0+..., let's use that as a hint.
+                print("WARNING: torch.version() could not find an installed PyTorch in the build env. "
+                      "Axolotl will NOT add torch to its dependencies. "
+                      "Ensure PyTorch is in your base environment. "
+                      "Using a placeholder for dependent package logic (xformers, etc.).")
+                # For the xformers/etc. logic, it needs a major/minor.
+                # Your actual torch is 2.7.0a0...
+                # So, for that logic, let's assume 2.7.
+                torch_version = "2.7.0" # This helps the xformers/vllm logic below pick correctly.
+                                        # If this default is wrong for some edge case, it may need adjustment.
+                                        # The original default was "2.6.0". If "2.7.0" causes issues
+                                        # with xformers selection, revert this specific line to "2.6.0"
+                                        # but KEEP the _install_requires.append line commented out.
 
+            # _install_requires.append(f"torch=={torch_version}") # <<< IMPORTANT: Keep this commented/deleted
+
+            # The rest of the logic for xformers, autoawq, vllm will use the torch_version determined above.
+            # This is fine, as it's about selecting *other* packages based on an *assumed* torch environment.
             version_match = re.match(r"^(\d+)\.(\d+)(?:\.(\d+))?", torch_version)
+            # ... (rest of the xformers/vllm/etc. logic remains unchanged)
             if version_match:
                 major, minor, patch = version_match.groups()
                 major, minor = int(major), int(minor)
