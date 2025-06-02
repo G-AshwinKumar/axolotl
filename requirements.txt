@@ -42,11 +42,11 @@ numpy>=1.24.4,<=2.0.1
 # qlora things
 evaluate==0.4.1
 scipy
-scikit-learn
-nvidia-ml-py
+scikit-learn==1.4.
+nvidia-ml-py==12.560.30
 art
 tensorboard
-python-dotenv
+python-dotenv==1.0.1
 
 # remote filesystems
 s3fs>=2024.5.0
