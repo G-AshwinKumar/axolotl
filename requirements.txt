@@ -43,10 +43,10 @@ numpy>=1.24.4,<=2.0.1
 evaluate==0.4.1
 scipy
 scikit-learn
-nvidia-ml-py==12.560.30
+nvidia-ml-py
 art
 tensorboard
-python-dotenv==1.0.1
+python-dotenv
 
 # remote filesystems
 s3fs>=2024.5.0
